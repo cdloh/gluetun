@@ -13,11 +13,10 @@ func (s *Server) runHealthcheckLoop(ctx context.Context, done chan<- struct{}) {
 	defer close(done)
 
 	s.vpn.healthyTimer = time.NewTimer(s.vpn.healthyWait)
+	s.logger.Debug("unhealthy count set to:" + strconv.FormatInt(int64(s.config.VPN.Attempts), 10))
 
 	for {
-		previousErr := s.handler.getErr()
-
-		const healthcheckTimeout = 3 * time.Second
+		const healthcheckTimeout = 30 * time.Second
 		healthcheckCtx, healthcheckCancel := context.WithTimeout(
 			ctx, healthcheckTimeout)
 		err := s.healthCheck(healthcheckCtx)
@@ -25,16 +24,17 @@ func (s *Server) runHealthcheckLoop(ctx context.Context, done chan<- struct{}) {
 
 		s.handler.setErr(err)
 
-		if previousErr != nil && err == nil {
+		if err == nil {
 			s.logger.Info("healthy!")
 			s.vpn.healthyTimer.Stop()
 			s.handler.resetFailures()
 			s.vpn.healthyWait = *s.config.VPN.Initial
 		} else if err != nil {
-			s.logger.Debug("unhealthy (" + strconv.FormatInt(int64(s.handler.getFailures()), 10) + "): " + err.Error())
 			s.handler.incrementFailures()
+			s.logger.Debug("unhealthy (" + strconv.FormatInt(int64(s.handler.getFailures()), 10) + "): " + err.Error())
 			s.vpn.healthyTimer.Stop()
 			if s.handler.getFailures() == s.config.VPN.Attempts {
+				s.logger.Debug("unhealthy starting timer")
 				s.vpn.healthyTimer = time.NewTimer(s.vpn.healthyWait)
 			}
 		}
