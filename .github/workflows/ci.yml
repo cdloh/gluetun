@@ -85,12 +85,9 @@ jobs:
 
   publish:
     if: |
-      github.repository == 'qdm12/gluetun' &&
-      (
-        github.event_name == 'push' ||
-        github.event_name == 'release' ||
-        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
-      )
+      github.event_name == 'push' ||
+      github.event_name == 'release' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
     needs: [verify, codeql]
     permissions:
       actions: read
@@ -124,13 +121,8 @@ jobs:
 
       - uses: docker/login-action@v3
         with:
-          username: qmcgaw
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - uses: docker/login-action@v3
-        with:
           registry: ghcr.io
-          username: qdm12
+          username: cdloh
           password: ${{ github.token }}
 
       - name: Short commit
