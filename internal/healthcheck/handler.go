@@ -50,7 +50,7 @@ func (h *handler) resetFailures() {
 }
 
 func (h *handler) incrementFailures() {
-	h.healthFailures = h.healthFailures + 1
+	h.healthFailures++
 }
 
 func (h *handler) getFailures() (errors int) {
