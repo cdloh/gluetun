@@ -32,7 +32,6 @@ func (s *Server) runHealthcheckLoop(ctx context.Context, done chan<- struct{}) {
 		} else if err != nil {
 			s.handler.incrementFailures()
 			s.logger.Debug("unhealthy (" + strconv.FormatInt(int64(s.handler.getFailures()), 10) + "): " + err.Error())
-			s.vpn.healthyTimer.Stop()
 			if s.handler.getFailures() >= s.config.VPN.Attempts {
 				s.logger.Debug("unhealthy starting timer")
 				s.vpn.healthyTimer = time.NewTimer(s.vpn.healthyWait)
